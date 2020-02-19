@@ -64,6 +64,10 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
             side_config.verify_cert = vm.verify_cert;
         }
 
+	if (vm.filters) {
+	    side_config.flattenedFilters = vm.filters;
+	}
+
         return MinemeldConfigService.saveDataFile(
             nodename + '_side_config',
             side_config
@@ -86,14 +90,13 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
         mi.result.then((result) => {
             vm.remote = result.remote;
 
-            return vm.saveSideConfig();
-        })
-        .then(() => {
-            toastr.success('REMOTE SET');
-            vm.loadSideConfig();
-        }, (error) => {
-            toastr.error('ERROR SETTING REMOTE: ' + error.statusText);
-        });
+            return vm.saveSideConfig().then(() => {
+            	toastr.success('REMOTE SET');
+            	vm.loadSideConfig();
+            }, (error) => {
+            	toastr.error('ERROR SETTING REMOTE: ' + error.statusText);
+            });
+    	});
     };
 
     vm.setToken = function() {
@@ -109,16 +112,14 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
         mi.result.then((result) => {
             vm.token = result.token;
 
-            return vm.saveSideConfig();
-        })
-        .then((result) => {
-            toastr.success('TOKEN SET');
-            vm.loadSideConfig();
-        }, (error) => {
-            toastr.error('ERROR SETTING TOKEN: ' + error.statusText);
-        });
+            return vm.saveSideConfig().then((result) => {
+            	toastr.success('TOKEN SET');
+            	vm.loadSideConfig();
+            }, (error) => {
+            	toastr.error('ERROR SETTING TOKEN: ' + error.statusText);
+            });
+    	});
     };
-
 
     vm.toggleVerifyCert = function() {
         var p, new_value;
@@ -158,21 +159,20 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
             backdrop: 'static',
             animation: false,
             resolve: {
-                filters: () => { return this.filters; }
+                filters: () => { return vm.filters; }
             }
         });
 
         mi.result.then((result) => {
-            this.filters = result.filters;
+            vm.filters = result.filters;
 
-            return vm.saveSideConfig();
-        })
-        .then((result) => {
-            toastr.success('FILTERS SET');
-            vm.loadSideConfig();
-        }, (error) => {
+            return vm.saveSideConfig().then((result) => {
+            	toastr.success('FILTERS SET');
+            	vm.loadSideConfig();
+            }, (error) => {
             toastr.error('ERROR SETTING FILTERS: ' + error.statusText);
-        });
+            });
+    	});
     };
 
     vm.loadSideConfig();
@@ -240,14 +240,14 @@ function CIFv3FiltersController($modalInstance, filters) {
 
     vm.filters = filters;
 
-    itypes: string = [
+    vm.itypes = [
         'ipv4',
         'ipv6',
         'fqdn',
         'url'
     ];
 
-    defaultTags: string = [
+    vm.defaultTags = [
         'whitelist',
         'spam',
         'malware',
