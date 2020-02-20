@@ -193,7 +193,7 @@ function CIFv3RemoteController($modalInstance, remote) {
     vm.valid = function() {
         angular.element('#remote').removeClass('has-error');
 
-        if (!vm.remote) {
+        if (!vm.remote || vm.remote == null) {
             return false;
         }
 
@@ -221,7 +221,7 @@ function CIFv3TokenController($modalInstance, token) {
     vm.valid = function() {
         angular.element('#token').removeClass('has-error');
 
-        if (!vm.token) {
+        if (!vm.token || vm.token == null) {
             return false;
         }
 
@@ -280,17 +280,17 @@ function CIFv3FiltersController($modalInstance, filters) {
             return false;
         }
 
-	if (vm.filters.itype === undefined || vm.filters.itype.length === 0) {
+	if (vm.filters.itype === undefined || vm.filters.itype == null || vm.filters.itype.length === 0) {
 	    angular.element('#fgItype').addClass('has-error');
 	    return false;
 	}
 
-	if (vm.filters.confidence === undefined || vm.filters.confidence < 0 || vm.filters.confidence > 10) {
+	if (vm.filters.confidence === undefined || vm.filters.confidence < 0 || vm.filters.confidence > 10 || vm.filters.confidence == null) {
 	    angular.element('#fgConfidence').addClass('has-error');
 	    return false;
 	}
 
-	if (vm.filters.tags === undefined || vm.filters.tags.length === 0) {
+	if (vm.filters.tags === undefined || vm.filters.tags == null || vm.filters.tags.length === 0) {
 	    angular.element('#fgTags').addClass('has-error');
 	    return false;
 	}

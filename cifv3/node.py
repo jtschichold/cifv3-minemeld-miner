@@ -115,7 +115,8 @@ class Miner(BasePollerFT):
 
         # build attributes to return
         a = {}
-        a['itype'] = itype
+        # minemeld attrib is just called 'type'
+        a['type'] = itype
 
         for field in self.fields:
             if field in ['indicator', 'itype', 'confidence']:
@@ -127,7 +128,8 @@ class Miner(BasePollerFT):
             a['{}_{}'.format(self.prefix, field)] = item[field]
 
         if item.get('confidence'):
-            a['confidence'] = item['confidence']
+            # minemeld confidence scores are 0-100, so multiply CIF conf by 10 to equivocate
+            a['confidence'] = (item['confidence'] * 10)
 
         LOG.debug('{} - {}: {}'.format(self.name, indicator, a))
 
