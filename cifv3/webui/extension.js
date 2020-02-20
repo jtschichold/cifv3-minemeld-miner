@@ -251,7 +251,7 @@ function CIFv3FiltersController($modalInstance, filters) {
         'ipv6',
         'fqdn',
         'url',
-  	    'md5',
+        'md5',
         'sha1',
         'sha256',
         'sha512', 
