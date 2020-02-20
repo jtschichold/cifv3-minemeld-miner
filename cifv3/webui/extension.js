@@ -10,7 +10,7 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
     vm.remote = undefined;
     vm.token = undefined;
     vm.verify_cert = undefined;
-
+    vm.filters = undefined;
 
     vm.loadSideConfig = function() {
         var nodename = $scope.$parent.vm.nodename;
@@ -20,8 +20,8 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
             if (!result) {
                 return;
             }
-
-            if (result.remote) {
+            
+  	    if (result.remote) {
                 vm.remote = result.remote;
             } else {
                 vm.remote = undefined;
@@ -38,6 +38,12 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
             } else {
                 vm.verify_cert = undefined;
             }
+
+	    if (result.filters) {
+		vm.filters = result.filters;
+	    } else {
+		vm.filters = undefined;
+	    }
 
         }, (error) => {
             toastr.error('ERROR RETRIEVING NODE SIDE CONFIG: ' + error.status);
@@ -65,7 +71,7 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
         }
 
 	if (vm.filters) {
-	    side_config.flattenedFilters = vm.filters;
+	    side_config.filters = vm.filters;
 	}
 
         return MinemeldConfigService.saveDataFile(
@@ -210,7 +216,7 @@ function CIFv3RemoteController($modalInstance, remote) {
 function CIFv3TokenController($modalInstance, token) {
     var vm = this;
 
-    vm.remote = token;
+    vm.token = token;
 
     vm.valid = function() {
         angular.element('#token').removeClass('has-error');
@@ -244,7 +250,12 @@ function CIFv3FiltersController($modalInstance, filters) {
         'ipv4',
         'ipv6',
         'fqdn',
-        'url'
+        'url',
+	'md5',
+	'sha1',
+	'sha256',
+	'sha512',
+	'email'
     ];
 
     vm.defaultTags = [
@@ -256,15 +267,33 @@ function CIFv3FiltersController($modalInstance, filters) {
         'honeypot',
         'botnet',
         'exploit',
-        'phishing'
+        'phishing',
+	'suspicious'
     ];
 
     vm.valid = function() {
-        //angular.element('#filters').removeClass('has-error');
+        angular.element('#fgItype').removeClass('has-error');
+	angular.element('#fgConfidence').removeClass('has-error');
+	angular.element('#fgTags').removeClass('has-error');
 
         if (!vm.filters) {
             return false;
         }
+
+	if (vm.filters.itype === undefined || vm.filters.itype.length === 0) {
+	    angular.element('#fgItype').addClass('has-error');
+	    return false;
+	}
+
+	if (vm.filters.confidence === undefined || vm.filters.confidence < 0 || vm.filters.confidence > 10) {
+	    angular.element('#fgConfidence').addClass('has-error');
+	    return false;
+	}
+
+	if (vm.filters.tags === undefined || vm.filters.tags.length === 0) {
+	    angular.element('#fgTags').addClass('has-error');
+	    return false;
+	}
 
         return true;
     };

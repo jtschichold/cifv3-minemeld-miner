@@ -16,7 +16,7 @@ prototypes:
       Miner for CIFv3 API. Based on CIFv3 SDK.
     config:
       source_name: cif.feed
-      indicator_types: null
+      indicator_types: [ any ]
       remote: null
       token: null
       verify_cert: true
