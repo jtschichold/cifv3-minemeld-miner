@@ -240,14 +240,14 @@ function CIFv3FiltersController($modalInstance, filters) {
 
     vm.filters = filters;
 
-    itypes: string = [
+    vm.itypes: string = [
         'ipv4',
         'ipv6',
         'fqdn',
         'url'
     ];
 
-    defaultTags: string = [
+    vm.defaultTags: string = [
         'whitelist',
         'spam',
         'malware',
