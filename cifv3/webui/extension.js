@@ -251,11 +251,11 @@ function CIFv3FiltersController($modalInstance, filters) {
         'ipv6',
         'fqdn',
         'url',
-	'md5',
-	'sha1',
-	'sha256',
-	'sha512',
-	'email'
+  	    'md5',
+        'sha1',
+        'sha256',
+        'sha512', 
+        'email'
     ];
 
     vm.defaultTags = [
@@ -268,7 +268,7 @@ function CIFv3FiltersController($modalInstance, filters) {
         'botnet',
         'exploit',
         'phishing',
-	'suspicious'
+        'suspicious'
     ];
 
     vm.valid = function() {

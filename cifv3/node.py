@@ -115,6 +115,7 @@ class Miner(BasePollerFT):
 
         # build attributes to return
         a = {}
+
         # minemeld attrib is just called 'type'
         a['type'] = itype
 
