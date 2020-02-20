@@ -32,12 +32,10 @@ class Miner(BasePollerFT):
         self.fields = ['tlp', 'group', 'reporttime', 'indicator', 'firsttime', 'lasttime', 'count', 'tags',
                        'description', 'confidence', 'rdata', 'provider']
 
-        self.side_config_path = self.config.get('side_config', None)
-        if self.side_config_path is None:
-            self.side_config_path = os.path.join(
-                os.environ['MM_CONFIG_DIR'],
-                '%s_side_config.yml' % self.name
-            )
+        self.side_config_path = os.path.join(
+            os.environ['MM_CONFIG_DIR'],
+            '{}_side_config.yml'.format(self.name)
+        )
 
         self._load_side_config()
 
@@ -62,6 +60,11 @@ class Miner(BasePollerFT):
                 self.filters.update(filters)
             else:
                 self.filters = filters
+
+        # for later param parsing by 'requests' library, list of tags needs to form a url
+        # such as /feed?tags=phishing,botnet as CIF server won't handle /feed?tags=phishing&tags=botnet
+        if isinstance(self.filters['tags'], list):
+            self.filters['tags'] = ','.join(map(str, self.filters['tags']))
 
     def _check_status(self, resp, expect=200):
         if resp.status_code == 400:
@@ -112,6 +115,8 @@ class Miner(BasePollerFT):
 
         # build attributes to return
         a = {}
+
+        # minemeld attrib is just called 'type'
         a['type'] = itype
 
         for field in self.fields:
@@ -124,6 +129,7 @@ class Miner(BasePollerFT):
             a['{}_{}'.format(self.prefix, field)] = item[field]
 
         if item.get('confidence'):
+            # minemeld confidence scores are 0-100, so multiply CIF conf by 10 to equivocate
             a['confidence'] = (item['confidence'] * 10)
 
         LOG.debug('{} - {}: {}'.format(self.name, indicator, a))

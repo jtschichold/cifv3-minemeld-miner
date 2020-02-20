@@ -10,7 +10,7 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
     vm.remote = undefined;
     vm.token = undefined;
     vm.verify_cert = undefined;
-
+    vm.filters = undefined;
 
     vm.loadSideConfig = function() {
         var nodename = $scope.$parent.vm.nodename;
@@ -20,8 +20,8 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
             if (!result) {
                 return;
             }
-
-            if (result.remote) {
+            
+  	    if (result.remote) {
                 vm.remote = result.remote;
             } else {
                 vm.remote = undefined;
@@ -38,6 +38,12 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
             } else {
                 vm.verify_cert = undefined;
             }
+
+	    if (result.filters) {
+		vm.filters = result.filters;
+	    } else {
+		vm.filters = undefined;
+	    }
 
         }, (error) => {
             toastr.error('ERROR RETRIEVING NODE SIDE CONFIG: ' + error.status);
@@ -64,6 +70,10 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
             side_config.verify_cert = vm.verify_cert;
         }
 
+	if (vm.filters) {
+	    side_config.filters = vm.filters;
+	}
+
         return MinemeldConfigService.saveDataFile(
             nodename + '_side_config',
             side_config
@@ -86,14 +96,13 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
         mi.result.then((result) => {
             vm.remote = result.remote;
 
-            return vm.saveSideConfig();
-        })
-        .then(() => {
-            toastr.success('REMOTE SET');
-            vm.loadSideConfig();
-        }, (error) => {
-            toastr.error('ERROR SETTING REMOTE: ' + error.statusText);
-        });
+            return vm.saveSideConfig().then(() => {
+            	toastr.success('REMOTE SET');
+            	vm.loadSideConfig();
+            }, (error) => {
+            	toastr.error('ERROR SETTING REMOTE: ' + error.statusText);
+            });
+    	});
     };
 
     vm.setToken = function() {
@@ -109,16 +118,14 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
         mi.result.then((result) => {
             vm.token = result.token;
 
-            return vm.saveSideConfig();
-        })
-        .then((result) => {
-            toastr.success('TOKEN SET');
-            vm.loadSideConfig();
-        }, (error) => {
-            toastr.error('ERROR SETTING TOKEN: ' + error.statusText);
-        });
+            return vm.saveSideConfig().then((result) => {
+            	toastr.success('TOKEN SET');
+            	vm.loadSideConfig();
+            }, (error) => {
+            	toastr.error('ERROR SETTING TOKEN: ' + error.statusText);
+            });
+    	});
     };
-
 
     vm.toggleVerifyCert = function() {
         var p, new_value;
@@ -158,21 +165,20 @@ function CIFv3SideConfigController($scope, MinemeldConfigService, MineMeldRunnin
             backdrop: 'static',
             animation: false,
             resolve: {
-                filters: () => { return this.filters; }
+                filters: () => { return vm.filters; }
             }
         });
 
         mi.result.then((result) => {
-            this.filters = result.filters;
+            vm.filters = result.filters;
 
-            return vm.saveSideConfig();
-        })
-        .then((result) => {
-            toastr.success('FILTERS SET');
-            vm.loadSideConfig();
-        }, (error) => {
+            return vm.saveSideConfig().then((result) => {
+            	toastr.success('FILTERS SET');
+            	vm.loadSideConfig();
+            }, (error) => {
             toastr.error('ERROR SETTING FILTERS: ' + error.statusText);
-        });
+            });
+    	});
     };
 
     vm.loadSideConfig();
@@ -187,7 +193,7 @@ function CIFv3RemoteController($modalInstance, remote) {
     vm.valid = function() {
         angular.element('#remote').removeClass('has-error');
 
-        if (!vm.remote) {
+        if (!vm.remote || vm.remote == null) {
             return false;
         }
 
@@ -210,12 +216,12 @@ function CIFv3RemoteController($modalInstance, remote) {
 function CIFv3TokenController($modalInstance, token) {
     var vm = this;
 
-    vm.remote = token;
+    vm.token = token;
 
     vm.valid = function() {
         angular.element('#token').removeClass('has-error');
 
-        if (!vm.token) {
+        if (!vm.token || vm.token == null) {
             return false;
         }
 
@@ -240,14 +246,19 @@ function CIFv3FiltersController($modalInstance, filters) {
 
     vm.filters = filters;
 
-    vm.itypes: string = [
+    vm.itypes = [
         'ipv4',
         'ipv6',
         'fqdn',
-        'url'
+        'url',
+  	    'md5',
+        'sha1',
+        'sha256',
+        'sha512', 
+        'email'
     ];
 
-    vm.defaultTags: string = [
+    vm.defaultTags = [
         'whitelist',
         'spam',
         'malware',
@@ -256,15 +267,33 @@ function CIFv3FiltersController($modalInstance, filters) {
         'honeypot',
         'botnet',
         'exploit',
-        'phishing'
+        'phishing',
+        'suspicious'
     ];
 
     vm.valid = function() {
-        //angular.element('#filters').removeClass('has-error');
+        angular.element('#fgItype').removeClass('has-error');
+	angular.element('#fgConfidence').removeClass('has-error');
+	angular.element('#fgTags').removeClass('has-error');
 
         if (!vm.filters) {
             return false;
         }
+
+	if (vm.filters.itype === undefined || vm.filters.itype == null || vm.filters.itype.length === 0) {
+	    angular.element('#fgItype').addClass('has-error');
+	    return false;
+	}
+
+	if (vm.filters.confidence === undefined || vm.filters.confidence < 0 || vm.filters.confidence > 10 || vm.filters.confidence == null) {
+	    angular.element('#fgConfidence').addClass('has-error');
+	    return false;
+	}
+
+	if (vm.filters.tags === undefined || vm.filters.tags == null || vm.filters.tags.length === 0) {
+	    angular.element('#fgTags').addClass('has-error');
+	    return false;
+	}
 
         return true;
     };
